@@ -4,7 +4,7 @@ get.singlets <- function(flow_frame){
 
   ## trim points that fall "too far" from the line
   ##      This is an attempt to remove doublets and other cell clumps.
-  singlet_flow_frame <- Subset(flow_frame, lm_fit$residuals ^ 2 < 0.05) #####CHANGEME: HARDCODED VALUE #####
+  singlet_flow_frame <- flowCore::Subset(flow_frame, lm_fit$residuals ^ 2 < 0.05) #####CHANGEME: HARDCODED VALUE #####
 
   return(singlet_flow_frame)
 }
