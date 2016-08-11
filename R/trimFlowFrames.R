@@ -57,43 +57,57 @@ trim.fcs <- function( dir_path, pattern = "*.fcs", do_plot = F ){
       plt_main <- ggplot2::ggplot() +
         ggplot2::geom_point(data=as.data.frame(flow_frame[,c("FSC-H", "SSC-H")]@exprs), ggplot2::aes(x=log10(`FSC-H`), y=log10(`SSC-H`),color="all_data"),alpha=0.1) +
         ggplot2::geom_point(data=as.data.frame(bacteria_flow_frame[,c("FSC-H", "SSC-H")]@exprs), ggplot2::aes(x=`FSC-H`, y=`SSC-H`,color="bacteria"),alpha=0.1) +
-        ggplot2::geom_point(data=as.data.frame(singlet_flow_frame[,c("FSC-H", "SSC-H")]@exprs), ggplot2::aes(x=`FSC-H`, y=`SSC-H`,color="single_bacteria"),alpha=0.1)
+        ggplot2::geom_point(data=as.data.frame(singlet_flow_frame[,c("FSC-H", "SSC-H")]@exprs), ggplot2::aes(x=`FSC-H`, y=`SSC-H`,color="single_bacteria"),alpha=0.1) +
+        ggplot2::xlim(0,7) +
+        ggplot2::ylim(0,7)
 
       plt_fsch <- ggplot2::ggplot() +
         ggplot2::geom_area(data=as.data.frame(flow_frame[,c("FSC-H")]@exprs), ggplot2::aes(x=log10(`FSC-H`),y=..count..,fill="all_data"),alpha=0.5, stat = "bin") +
         ggplot2::geom_area(data=as.data.frame(bacteria_flow_frame[,c("FSC-H")]@exprs), ggplot2::aes(x=`FSC-H`,y=..count..,fill="bacteria"),alpha=0.5, stat = "bin") +
-        ggplot2::geom_area(data=as.data.frame(singlet_flow_frame[,c("FSC-H")]@exprs), ggplot2::aes(x=`FSC-H`,y=..count..,fill="single_bacteria"),alpha=0.5, stat = "bin")
+        ggplot2::geom_area(data=as.data.frame(singlet_flow_frame[,c("FSC-H")]@exprs), ggplot2::aes(x=`FSC-H`,y=..count..,fill="single_bacteria"),alpha=0.5, stat = "bin") +
+        ggplot2::xlim(0,7)
 
       plt_ssch <- ggplot2::ggplot() +
         ggplot2::geom_area(data=as.data.frame(flow_frame[,c("SSC-H")]@exprs), ggplot2::aes(x=log10(`SSC-H`),y=..count..,fill="all_data"),alpha=0.5, stat = "bin") +
         ggplot2::geom_area(data=as.data.frame(bacteria_flow_frame[,c("SSC-H")]@exprs), ggplot2::aes(x=`SSC-H`,y=..count..,fill="bacteria"),alpha=0.5, stat = "bin") +
-        ggplot2::geom_area(data=as.data.frame(singlet_flow_frame[,c("SSC-H")]@exprs), ggplot2::aes(x=`SSC-H`,y=..count..,fill="single_bacteria"),alpha=0.5, stat = "bin")
+        ggplot2::geom_area(data=as.data.frame(singlet_flow_frame[,c("SSC-H")]@exprs), ggplot2::aes(x=`SSC-H`,y=..count..,fill="single_bacteria"),alpha=0.5, stat = "bin") +
+        ggplot2::xlim(0,7)
 
       if (is.element("FL1-H", flowCore::colnames(flow_frame))){
         plt_bl1h <- ggplot2::ggplot() +
           ggplot2::geom_area(data=as.data.frame(flow_frame[,c("FL1-H")]@exprs), ggplot2::aes(x=log10(`FL1-H`),y=..count..,fill="all_data"),alpha=0.5, stat = "bin") +
           ggplot2::geom_area(data=as.data.frame(bacteria_flow_frame[,c("FL1-H")]@exprs), ggplot2::aes(x=`FL1-H`,y=..count..,fill="bacteria"),alpha=0.5, stat = "bin") +
-          ggplot2::geom_area(data=as.data.frame(singlet_flow_frame[,c("FL1-H")]@exprs), ggplot2::aes(x=`FL1-H`,y=..count..,fill="single_bacteria"),alpha=0.5, stat = "bin")
+          ggplot2::geom_area(data=as.data.frame(singlet_flow_frame[,c("FL1-H")]@exprs), ggplot2::aes(x=`FL1-H`,y=..count..,fill="single_bacteria"),alpha=0.5, stat = "bin") +
+          ggplot2::xlim(0,7)
       } else {
         plt_bl1h <- ggplot2::ggplot() +
           ggplot2::geom_area(data=as.data.frame(flow_frame[,c("BL1-H")]@exprs), ggplot2::aes(x=log10(`BL1-H`),y=..count..,fill="all_data"),alpha=0.5, stat = "bin") +
           ggplot2::geom_area(data=as.data.frame(bacteria_flow_frame[,c("BL1-H")]@exprs), ggplot2::aes(x=`BL1-H`,y=..count..,fill="bacteria"),alpha=0.5, stat = "bin") +
-          ggplot2::geom_area(data=as.data.frame(singlet_flow_frame[,c("BL1-H")]@exprs), ggplot2::aes(x=`BL1-H`,y=..count..,fill="single_bacteria"),alpha=0.5, stat = "bin")
+          ggplot2::geom_area(data=as.data.frame(singlet_flow_frame[,c("BL1-H")]@exprs), ggplot2::aes(x=`BL1-H`,y=..count..,fill="single_bacteria"),alpha=0.5, stat = "bin") +
+          ggplot2::xlim(0,7)
+
+        plt_yl1h <- ggplot2::ggplot() +
+          ggplot2::geom_area(data=as.data.frame(flow_frame[,c("YL1-H")]@exprs), ggplot2::aes(x=log10(`YL1-H`),y=..count..,fill="all_data"),alpha=0.5, stat = "bin") +
+          ggplot2::geom_area(data=as.data.frame(bacteria_flow_frame[,c("YL1-H")]@exprs), ggplot2::aes(x=`YL1-H`,y=..count..,fill="bacteria"),alpha=0.5, stat = "bin") +
+          ggplot2::geom_area(data=as.data.frame(singlet_flow_frame[,c("YL1-H")]@exprs), ggplot2::aes(x=`YL1-H`,y=..count..,fill="single_bacteria"),alpha=0.5, stat = "bin") +
+          ggplot2::xlim(0,7)
       }
 
       plt_single <- ggplot2::ggplot() +
         ggplot2::geom_point(data=as.data.frame(flow_frame[,c("SSC-H", "SSC-A")]@exprs), ggplot2::aes(x=log10(`SSC-H`), y=log10(`SSC-A`),color="all_data"),alpha=0.1) +
         ggplot2::geom_point(data=as.data.frame(bacteria_flow_frame[,c("SSC-H", "SSC-A")]@exprs), ggplot2::aes(x=`SSC-H`, y=(`SSC-A`),color="bacteria"),alpha=0.1) +
-        ggplot2::geom_point(data=as.data.frame(singlet_flow_frame[,c("SSC-H", "SSC-A")]@exprs), ggplot2::aes(x=`SSC-H`, y=(`SSC-A`),color="single_bacteria"),alpha=0.1)
+        ggplot2::geom_point(data=as.data.frame(singlet_flow_frame[,c("SSC-H", "SSC-A")]@exprs), ggplot2::aes(x=`SSC-H`, y=(`SSC-A`),color="single_bacteria"),alpha=0.1) +
+        ggplot2::xlim(0,7) +
+        ggplot2::ylim(0,7)
 
       legend <- get_legend(plt_main)
       plt_main <- plt_main + ggplot2::theme(legend.position = "none")
       plt_single <- plt_single + ggplot2::theme(legend.position = "none")
-      plt_fsch <- plt_fsch + ggplot2::theme(legend.position = "none")
       plt_ssch <- plt_ssch + ggplot2::theme(legend.position = "none")
       plt_bl1h <- plt_bl1h + ggplot2::theme(legend.position = "none")
-      plt <- gridExtra::arrangeGrob(plt_main, plt_single, legend, plt_fsch, plt_ssch,
-                         plt_bl1h, ncol = 3, nrow = 2)
+      plt_yl1h <- plt_yl1h + ggplot2::theme(legend.position = "none")
+      plt <- gridExtra::arrangeGrob(plt_main, plt_single, legend, plt_ssch,
+                         plt_bl1h, plt_yl1h, ncol = 3, nrow = 2)
       title <- grid::textGrob(paste("Trimming of flow data to remove background and doublets:\n ", flowCore::identifier(flow_frame)))
       padding <- grid::unit(5, "mm")
       plt <- gtable::gtable_add_rows(plt, heights = grid::grobHeight(title) + padding, pos = 0)
