@@ -16,7 +16,7 @@
 #' @param pattern a regex pattern to match particular .fcs files. Default is \code{"*.fcs"} matching all .fcs files.
 #' @param do_plot a Boolean flag to determine whether to produce plots showing the trimming of each flowFrame. Defaults to \code{FALSE}.
 #'
-#' @return
+#' @return nothing is returned. A new folder is created with the trimmed .fcs files and plots if the do_plot flag is TRUE.
 #' @export
 trim.fcs <- function( dir_path, pattern = "*.fcs", do_plot = F ){
   all_files <- list.files(path = dir_path, pattern = glob2rx(pattern),
@@ -24,7 +24,7 @@ trim.fcs <- function( dir_path, pattern = "*.fcs", do_plot = F ){
   print(paste("Trimming ", length(all_files), " .fcs files.", sep=""))
 
   for (next_fcs in all_files){
-    flow_frame <- flowCore::read.FCS(next_fcs)
+    flow_frame <- flowCore::read.FCS(next_fcs, emptyValue = F)
 
     ## Trim 0 values and log10 transform
     prepped_flow_frame <- prep.flowFrame(flow_frame)

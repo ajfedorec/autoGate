@@ -13,6 +13,9 @@ trim.fcs(dir_path, pattern = "*.fcs", do_plot = F)
 
 \item{do_plot}{a Boolean flag to determine whether to produce plots showing the trimming of each flowFrame. Defaults to \code{FALSE}.}
 }
+\value{
+nothing is returned. A new folder is created with the trimmed .fcs files and plots if the do_plot flag is TRUE.
+}
 \description{
 \code{trim.fcs} uses mixture models to cluster bacteria from background debris and fits a linear model to SSC-H vs SSC-A to remove doublets.
 }

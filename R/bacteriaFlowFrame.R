@@ -18,7 +18,7 @@ get.bacteria <- function(flow_frame) {
   ## clst.indx is the index of the cluster which has its centre closest to ssc-h = 4
   ##    the "box(4, flowClust.res@lambda)" is because a Box-Cox transformation
   ##    needs to be applied to get the value of 4 in the clustering space.
-  clst.indx <- which(abs(flowClust.res@mu[, 2]-box(4, flowClust.res@lambda))==min(abs(flowClust.res@mu[, 2]-box(4, flowClust.res@lambda))))
+  clst.indx <- which(abs(flowClust.res@mu[, 2]-flowClust::box(4, flowClust.res@lambda))==min(abs(flowClust.res@mu[, 2]-flowClust::box(4, flowClust.res@lambda))))
   bact_flow_frame <- flowClust::split(flow_frame, flowClust.res)[[clst.indx]]
 
   return(bact_flow_frame)
