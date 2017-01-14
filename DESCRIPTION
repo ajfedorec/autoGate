@@ -16,7 +16,9 @@ Imports:
     ggplot2,
     gridExtra,
     grid,
-    gtable
+    gtable,
+    stats,
+    utils
 LinkingTo:
 Suggests:
 License: GPL-2
