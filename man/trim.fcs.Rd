@@ -4,7 +4,8 @@
 \alias{trim.fcs}
 \title{Trim .fcs files to remove debris and doublets.}
 \usage{
-trim.fcs(dir_path, pattern = "*.fcs", do_plot = F)
+trim.fcs(dir_path, pattern = "*.fcs", do_plot = F,
+  plt_filters = c("BL1-H"))
 }
 \arguments{
 \item{dir_path}{a directory path containing the .fcs files  to be parsed or folders to be recursed through.}
@@ -12,6 +13,8 @@ trim.fcs(dir_path, pattern = "*.fcs", do_plot = F)
 \item{pattern}{a regex pattern to match particular .fcs files. Default is \code{"*.fcs"} matching all .fcs files.}
 
 \item{do_plot}{a Boolean flag to determine whether to produce plots showing the trimming of each flowFrame. Defaults to \code{FALSE}.}
+
+\item{plt_filters}{a list of strings of the fluorescence channels to include in the plotting. Defaults to "BL1-H".}
 }
 \value{
 nothing is returned. A new folder is created with the trimmed .fcs files and plots if the do_plot flag is TRUE.
@@ -19,4 +22,3 @@ nothing is returned. A new folder is created with the trimmed .fcs files and plo
 \description{
 \code{trim.fcs} uses mixture models to cluster bacteria from background debris and fits a linear model to SSC-H vs SSC-A to remove doublets.
 }
-

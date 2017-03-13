@@ -13,8 +13,8 @@ get.bacteria <- function(flow_frame) {
   print(paste(best.clusters@K, "clusters found"))
 
   ## this is a horrible hack
-  ## The bacterial clusters seem to be close to SSC-H == 4 so we find the
-  ## cluster which is closest.
+  ## For the flow settings I've been using the bacterial clusters seem to be
+  ## close to SSC-H == 4 so we find the cluster which is closest.
   ## clst.indx is the index of the cluster which has its centre closest to
   ## ssc-h = 4
   ##    the "box(4, all_clusters@lambda)" is because a Box-Cox transformation

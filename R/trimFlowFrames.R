@@ -5,10 +5,11 @@
 #' @param dir_path a directory path containing the .fcs files  to be parsed or folders to be recursed through.
 #' @param pattern a regex pattern to match particular .fcs files. Default is \code{"*.fcs"} matching all .fcs files.
 #' @param do_plot a Boolean flag to determine whether to produce plots showing the trimming of each flowFrame. Defaults to \code{FALSE}.
+#' @param plt_filters a list of strings of the fluorescence channels to include in the plotting. Defaults to "BL1-H".
 #'
 #' @return nothing is returned. A new folder is created with the trimmed .fcs files and plots if the do_plot flag is TRUE.
 #' @export
-trim.fcs <- function( dir_path, pattern = "*.fcs", do_plot = F ){
+trim.fcs <- function( dir_path, pattern = "*.fcs", do_plot = F, plt_filters=c("BL1-H") ){
   all_files <- list.files(path = dir_path, pattern = utils::glob2rx(pattern),
                           full.names = T, recursive = T, include.dirs = T)
   print(paste("Trimming ", length(all_files), " .fcs files.", sep = ""))
@@ -38,6 +39,20 @@ trim.fcs <- function( dir_path, pattern = "*.fcs", do_plot = F ){
 
     ##  Plot a grid of graphs showing the stages of trimming
     if (do_plot){
+      ## Theme
+      apatheme=ggplot2::theme_bw()+
+        ggplot2::theme(strip.text.x = ggplot2::element_text(size=14),
+              strip.background = ggplot2::element_rect(colour="white"),
+              axis.text = ggplot2::element_text(size=10),
+              axis.text.x = ggplot2::element_text(angle=-40, vjust = 0.5),
+              axis.title = ggplot2::element_text(size=14),
+              text=ggplot2::element_text(family='Garamond'),
+              panel.grid.major=ggplot2::element_blank(),
+              panel.grid.minor=ggplot2::element_blank(),
+              panel.border=ggplot2::element_blank(),
+              axis.line=ggplot2::element_line(),
+              legend.title=ggplot2::element_blank())
+
       ##  This function allows us to take a legend from a plot
       get_legend <- function(myggplot){
         tmp <- ggplot2::ggplot_gtable(ggplot2::ggplot_build(myggplot))
@@ -46,6 +61,8 @@ trim.fcs <- function( dir_path, pattern = "*.fcs", do_plot = F ){
         return(legend)
       }
 
+      plts <- list()
+      ## FSC-H vs SSC-H
       plt_main <- ggplot2::ggplot() +
         ggplot2::geom_point(data = as.data.frame(flow_frame[, c("FSC-H", "SSC-H")]@exprs),
                             ggplot2::aes(x = log10(`FSC-H`), y = log10(`SSC-H`), color = "all_data"),
@@ -57,154 +74,15 @@ trim.fcs <- function( dir_path, pattern = "*.fcs", do_plot = F ){
                             ggplot2::aes(x = `FSC-H`, y = `SSC-H`, color = "single_bacteria"),
                             alpha = 0.1) +
         ggplot2::xlim(0, 7) +
-        ggplot2::ylim(0, 7)
+        ggplot2::ylim(0, 7) + apatheme
 
-      plt_fsch <- ggplot2::ggplot() +
-        ggplot2::geom_area(data = as.data.frame(flow_frame[, c("FSC-H")]@exprs),
-                           ggplot2::aes(x = log10(`FSC-H`), y = ..count.., fill = "all_data"),
-                           alpha = 0.5,
-                           stat = "bin") +
-        ggplot2::geom_area(data = as.data.frame(bacteria_flow_frame[, c("FSC-H")]@exprs),
-                           ggplot2::aes(x = `FSC-H`, y = ..count.., fill = "bacteria"),
-                           alpha = 0.5,
-                           stat = "bin") +
-        ggplot2::geom_area(data = as.data.frame(singlet_flow_frame[, c("FSC-H")]@exprs),
-                           ggplot2::aes(x = `FSC-H`, y = ..count.., fill = "single_bacteria"),
-                           alpha = 0.5,
-                           stat = "bin") +
-        ggplot2::xlim(0, 7) +
-        ggplot2::theme(legend.position = "none")
+      ## Grab the legend to use seperately
+      legend <- get_legend(plt_main)
+      plt_main <- plt_main + ggplot2::theme(legend.position = "none")
 
-      plt_ssch <- ggplot2::ggplot() +
-        ggplot2::geom_area(data = as.data.frame(flow_frame[, c("SSC-H")]@exprs),
-                           ggplot2::aes(x = log10(`SSC-H`), y = ..count.., fill = "all_data"),
-                           alpha = 0.5,
-                           stat = "bin") +
-        ggplot2::geom_area(data = as.data.frame(bacteria_flow_frame[, c("SSC-H")]@exprs),
-                           ggplot2::aes(x = `SSC-H`, y = ..count.., fill = "bacteria"),
-                           alpha = 0.5,
-                           stat = "bin") +
-        ggplot2::geom_area(data = as.data.frame(singlet_flow_frame[, c("SSC-H")]@exprs),
-                           ggplot2::aes(x = `SSC-H`, y = ..count.., fill = "single_bacteria"),
-                           alpha = 0.5,
-                           stat = "bin") +
-        ggplot2::xlim(0, 7) +
-        ggplot2::theme(legend.position = "none")
+      plts[[1]] <- plt_main
 
-      if (is.element("FL1-H", flowCore::colnames(flow_frame))){
-        plt_bl1h <- ggplot2::ggplot() +
-          ggplot2::geom_area(data = as.data.frame(flow_frame[, c("FL1-H")]@exprs),
-                             ggplot2::aes(x = log10(`FL1-H`), y = ..count.., fill = "all_data"),
-                             alpha = 0.5,
-                             stat = "bin") +
-          ggplot2::geom_area(data = as.data.frame(bacteria_flow_frame[, c("FL1-H")]@exprs),
-                             ggplot2::aes(x = `FL1-H`, y = ..count.., fill = "bacteria"),
-                             alpha = 0.5,
-                             stat = "bin") +
-          ggplot2::geom_area(data = as.data.frame(singlet_flow_frame[, c("FL1-H")]@exprs),
-                             ggplot2::aes(x = `FL1-H`, y = ..count.., fill = "single_bacteria"),
-                             alpha = 0.5,
-                             stat = "bin") +
-          ggplot2::xlim(0, 7) +
-          ggplot2::theme(legend.position = "none")
-      } else {
-#         plt_vl1h <- ggplot2::ggplot() +
-#           ggplot2::geom_area(data = as.data.frame(flow_frame[, c("VL1-H")]@exprs),
-#                              ggplot2::aes(x = log10(`VL1-H`), y = ..count.., fill = "all_data"),
-#                              alpha = 0.5,
-#                              stat = "bin") +
-#           ggplot2::geom_area(data = as.data.frame(bacteria_flow_frame[, c("VL1-H")]@exprs),
-#                              ggplot2::aes(x = `VL1-H`, y = ..count.., fill = "bacteria"),
-#                              alpha = 0.5,
-#                              stat = "bin") +
-#           ggplot2::geom_area(data = as.data.frame(singlet_flow_frame[, c("VL1-H")]@exprs),
-#                              ggplot2::aes(x = `VL1-H`, y = ..count.., fill = "single_bacteria"),
-#                              alpha = 0.5,
-#                              stat = "bin") +
-#           ggplot2::xlim(0, 7) +
-#           ggplot2::theme(legend.position = "none")
-#
-#         plt_vl2h <- ggplot2::ggplot() +
-#           ggplot2::geom_area(data = as.data.frame(flow_frame[, c("VL2-H")]@exprs),
-#                              ggplot2::aes(x = log10(`VL2-H`), y = ..count.., fill = "all_data"),
-#                              alpha = 0.5,
-#                              stat = "bin") +
-#           ggplot2::geom_area(data = as.data.frame(bacteria_flow_frame[, c("VL2-H")]@exprs),
-#                              ggplot2::aes(x = `VL2-H`, y = ..count.., fill = "bacteria"),
-#                              alpha = 0.5,
-#                              stat = "bin") +
-#           ggplot2::geom_area(data = as.data.frame(singlet_flow_frame[, c("VL2-H")]@exprs),
-#                              ggplot2::aes(x = `VL2-H`, y = ..count.., fill = "single_bacteria"),
-#                              alpha = 0.5,
-#                              stat = "bin") +
-#           ggplot2::xlim(0, 7) +
-#           ggplot2::theme(legend.position = "none")
-
-        plt_bl1h <- ggplot2::ggplot() +
-          ggplot2::geom_area(data = as.data.frame(flow_frame[, c("BL1-H")]@exprs),
-                             ggplot2::aes(x = log10(`BL1-H`), y = ..count.., fill = "all_data"),
-                             alpha = 0.5,
-                             stat = "bin") +
-          ggplot2::geom_area(data = as.data.frame(bacteria_flow_frame[, c("BL1-H")]@exprs),
-                             ggplot2::aes(x = `BL1-H`, y = ..count.., fill = "bacteria"),
-                             alpha = 0.5,
-                             stat = "bin") +
-          ggplot2::geom_area(data = as.data.frame(singlet_flow_frame[, c("BL1-H")]@exprs),
-                             ggplot2::aes(x = `BL1-H`, y = ..count.., fill = "single_bacteria"),
-                             alpha = 0.5,
-                             stat = "bin") +
-          ggplot2::xlim(0, 7) +
-          ggplot2::theme(legend.position = "none")
-
-#         plt_bl2h <- ggplot2::ggplot() +
-#           ggplot2::geom_area(data = as.data.frame(flow_frame[, c("BL2-H")]@exprs),
-#                              ggplot2::aes(x = log10(`BL2-H`), y = ..count.., fill = "all_data"),
-#                              alpha = 0.5,
-#                              stat = "bin") +
-#           ggplot2::geom_area(data = as.data.frame(bacteria_flow_frame[, c("BL2-H")]@exprs),
-#                              ggplot2::aes(x = `BL2-H`, y = ..count.., fill = "bacteria"),
-#                              alpha = 0.5,
-#                              stat = "bin") +
-#           ggplot2::geom_area(data = as.data.frame(singlet_flow_frame[, c("BL2-H")]@exprs),
-#                              ggplot2::aes(x = `BL2-H`, y = ..count.., fill = "single_bacteria"),
-#                              alpha = 0.5,
-#                              stat = "bin") +
-#           ggplot2::xlim(0, 7) +
-#           ggplot2::theme(legend.position = "none")
-#
-#         plt_yl1h <- ggplot2::ggplot() +
-#           ggplot2::geom_area(data = as.data.frame(flow_frame[, c("YL1-H")]@exprs),
-#                              ggplot2::aes(x = log10(`YL1-H`), y = ..count.., fill = "all_data"),
-#                              alpha = 0.5,
-#                              stat = "bin") +
-#           ggplot2::geom_area(data = as.data.frame(bacteria_flow_frame[, c("YL1-H")]@exprs),
-#                              ggplot2::aes(x = `YL1-H`, y = ..count.., fill = "bacteria"),
-#                              alpha = 0.5,
-#                              stat = "bin") +
-#           ggplot2::geom_area(data = as.data.frame(singlet_flow_frame[, c("YL1-H")]@exprs),
-#                              ggplot2::aes(x = `YL1-H`, y = ..count.., fill = "single_bacteria"),
-#                              alpha = 0.5,
-#                              stat = "bin") +
-#           ggplot2::xlim(0, 7) +
-#           ggplot2::theme(legend.position = "none")
-#
-#         plt_yl2h <- ggplot2::ggplot() +
-#           ggplot2::geom_area(data = as.data.frame(flow_frame[, c("YL2-H")]@exprs),
-#                              ggplot2::aes(x = log10(`YL2-H`), y = ..count.., fill = "all_data"),
-#                              alpha = 0.5,
-#                              stat = "bin") +
-#           ggplot2::geom_area(data = as.data.frame(bacteria_flow_frame[, c("YL2-H")]@exprs),
-#                              ggplot2::aes(x = `YL2-H`, y = ..count.., fill = "bacteria"),
-#                              alpha = 0.5,
-#                              stat = "bin") +
-#           ggplot2::geom_area(data = as.data.frame(singlet_flow_frame[, c("YL2-H")]@exprs),
-#                              ggplot2::aes(x = `YL2-H`, y = ..count.., fill = "single_bacteria"),
-#                              alpha = 0.5,
-#                              stat = "bin") +
-#           ggplot2::xlim(0, 7) +
-#           ggplot2::theme(legend.position = "none")
-      }
-
+      ## SSC-H vs SSC-A
       plt_single <- ggplot2::ggplot() +
         ggplot2::geom_point(data = as.data.frame(flow_frame[, c("SSC-H", "SSC-A")]@exprs),
                             ggplot2::aes(x = log10(`SSC-H`), y = log10(`SSC-A`), color = "all_data"),
@@ -216,20 +94,35 @@ trim.fcs <- function( dir_path, pattern = "*.fcs", do_plot = F ){
                             ggplot2::aes(x = `SSC-H`, y = (`SSC-A`), color = "single_bacteria"),
                             alpha = 0.1) +
         ggplot2::xlim(0, 7) +
-        ggplot2::ylim(0, 7) +
+        ggplot2::ylim(0, 7)  + apatheme +
         ggplot2::theme(legend.position = "none")
 
-      legend <- get_legend(plt_main)
-      plt_main <- plt_main + ggplot2::theme(legend.position = "none")
-#       plt <- gridExtra::arrangeGrob(plt_main, plt_single, legend, plt_ssch,
-#                          plt_bl1h, plt_yl1h, ncol = 3, nrow = 2)
-#       plt <- gridExtra::arrangeGrob(plt_main, plt_single, legend,
-#                                     plt_vl1h, plt_vl2h, plt_bl1h,
-#                                     plt_bl2h, plt_yl1h, plt_yl2h,
-#                                     ncol = 3, nrow = 3)
-        plt <- gridExtra::arrangeGrob(plt_main, plt_single,
-                                      plt_bl1h, legend,
-                                      ncol = 2, nrow = 2)
+      plts[[2]] <- plt_single
+
+      other.plts <- list()
+      for(i in 1:length(plt_filters)){
+        filt <- plt_filters[i]
+        plts[[i+2]] <- ggplot2::ggplot() +
+          ggplot2::geom_density(data = as.data.frame(flow_frame[, filt]@exprs),
+                             ggplot2::aes(x = log10(flow_frame[, filt]@exprs), y = ..count.., fill = "all_data"),
+                             alpha = 0.5) +
+          ggplot2::geom_density(data = as.data.frame(bacteria_flow_frame[, filt]@exprs),
+                             ggplot2::aes(x = bacteria_flow_frame[, filt]@exprs, y = ..count.., fill = "bacteria"),
+                             alpha = 0.5) +
+          ggplot2::geom_density(data = as.data.frame(singlet_flow_frame[, filt]@exprs),
+                             ggplot2::aes(x = singlet_flow_frame[, filt]@exprs, y = ..count.., fill = "single_bacteria"),
+                             alpha = 0.5) +
+          ggplot2::xlab(filt) +
+          ggplot2::ylab("") +
+          ggplot2::xlim(0, 7)  + apatheme +
+          ggplot2::theme(axis.text.y = ggplot2::element_blank(), axis.ticks.y = ggplot2::element_blank())+
+          ggplot2::theme(legend.position = "none")
+
+      }
+
+      plts[[3+length(plt_filters)]] <- legend
+
+      plt <- gridExtra::arrangeGrob(grobs=plts, ncol=2)
       title <- grid::textGrob(paste("Trimming of flow data to remove background
                                     and doublets:\n ",
                                     flowCore::identifier(flow_frame)))
@@ -240,10 +133,11 @@ trim.fcs <- function( dir_path, pattern = "*.fcs", do_plot = F ){
       plt <- gtable::gtable_add_grob(plt, title, 1, 1, 1, ncol(plt))
 
       ggplot2::ggsave(filename = paste(dirname(out_name),
-                              gsub(".fcs",
-                                   "_trimmed.png",
-                                   basename(out_name)),
-                              sep = "/"), plot = plt)
+                                       gsub(".fcs",
+                                            "_trimmed.png",
+                                            basename(out_name)),
+                                       sep = "/"), plot = plt)
+
       print(paste("Plotting trimmed flowFrame ",
                   flowCore::identifier(flow_frame)))
     }
