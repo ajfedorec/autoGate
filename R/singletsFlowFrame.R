@@ -6,7 +6,7 @@ get.singlets <- function(flow_frame){
   ##      This is an attempt to remove doublets and other cell clumps.
   ##      #####CHANGEME: HARDCODED VALUE #####
   singlet_flow_frame <- flowCore::Subset(flow_frame,
-                                         lm_fit$residuals ^ 2 < 0.05)
+                                         lm_fit$residuals ^ 2 < 0.01)
 
   return(singlet_flow_frame)
 }

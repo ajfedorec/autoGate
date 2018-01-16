@@ -4,17 +4,17 @@
 \alias{trim.fcs}
 \title{Trim .fcs files to remove debris and doublets.}
 \usage{
-trim.fcs(dir_path, pattern = "*.fcs", do_plot = F,
-  plt_filters = c("BL1-H"))
+trim.fcs(dir_path, pattern = "*.fcs", flu_channels = c("BL1-H"),
+  do_plot = F)
 }
 \arguments{
 \item{dir_path}{a directory path containing the .fcs files  to be parsed or folders to be recursed through.}
 
 \item{pattern}{a regex pattern to match particular .fcs files. Default is \code{"*.fcs"} matching all .fcs files.}
 
-\item{do_plot}{a Boolean flag to determine whether to produce plots showing the trimming of each flowFrame. Defaults to \code{FALSE}.}
+\item{flu_channels}{a list of strings of the fluorescence channels to keep in the trimmed data and plotting. Defaults to "BL1-H".}
 
-\item{plt_filters}{a list of strings of the fluorescence channels to include in the plotting. Defaults to "BL1-H".}
+\item{do_plot}{a Boolean flag to determine whether to produce plots showing the trimming of each flowFrame. Defaults to \code{FALSE}.}
 }
 \value{
 nothing is returned. A new folder is created with the trimmed .fcs files and plots if the do_plot flag is TRUE.

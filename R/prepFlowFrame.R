@@ -1,23 +1,20 @@
-prep.flowFrame <- function(flow_frame) {
-  # Remove 0 values as these produce -Inf values when log10 is applied
-#   trimmed_flow_frame <- flow_frame
-#   for (marker in colnames(flow_frame)) {
-#     trimmed_flow_frame <-
-#       flowCore::Subset(trimmed_flow_frame,
-#                        as.logical(flowCore::exprs(trimmed_flow_frame[, marker]) > 0.0))
-#   }
+prep.flowFrame <- function(flow_frame, flus) {
 
-  trimmed_flow_frame <- flow_frame
-  for (marker in c("FSC-H", "SSC-H", "SSC-A")) {
-    trimmed_flow_frame <-
-      flowCore::Subset(trimmed_flow_frame,
-                       as.logical(flowCore::exprs(trimmed_flow_frame[, marker]) > 0.0))
-  }
+  # Remove channels that aren't being kept
+  min_flow_frame <- flow_frame[,c("FSC-H", "SSC-H", "SSC-A", flus)]
 
   # log10 transform the values
   log10_flow_frame <-
-    flowCore::transform(trimmed_flow_frame,
-                        flowCore::transformList(from = flowCore::colnames(trimmed_flow_frame), tfun = log10))
+    flowCore::transform(min_flow_frame,
+                        flowCore::transformList(from = flowCore::colnames(min_flow_frame), tfun = log10))
 
-  return(log10_flow_frame)
+  # Remove -Inf values produced when log10 is applied
+  trimmed_flow_frame <- log10_flow_frame
+  for (marker in c("FSC-H", "SSC-H", "SSC-A", flus)) {
+    trimmed_flow_frame <-
+      flowCore::Subset(trimmed_flow_frame,
+                       is.finite(flowCore::exprs(trimmed_flow_frame[, marker]))[,1])
+  }
+
+  return(trimmed_flow_frame)
 }

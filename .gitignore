@@ -36,3 +36,4 @@ Temporary Items
 .apdisk
 .Rproj.user
 packrat/lib*/
+*.Rhistory
