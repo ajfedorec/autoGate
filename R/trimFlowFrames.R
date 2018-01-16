@@ -104,27 +104,31 @@ trim.fcs <- function(dir_path, pattern = "*.fcs", flu_channels=c("BL1-H"), do_pl
 
       plts[[2]] <- plt_single
 
-      for (i in 1:length(flu_channels)) {
-        filt <- flu_channels[i]
-        plts[[i + 2]] <- ggplot2::ggplot() +
-          ggplot2::geom_density(data = as.data.frame(flow_frame[, filt]@exprs),
-                                ggplot2::aes(x = log10(flow_frame[, filt]@exprs),
-                                             y = ..count.., fill = "all_data"),
-                                alpha = 0.5) +
-          ggplot2::geom_density(data = as.data.frame(bacteria_flow_frame[, filt]@exprs),
-                                ggplot2::aes(x = bacteria_flow_frame[, filt]@exprs,
-                                             y = ..count.., fill = "bacteria"),
-                                alpha = 0.5) +
-          ggplot2::geom_density(data = as.data.frame(singlet_flow_frame[, filt]@exprs),
-                                ggplot2::aes(x = singlet_flow_frame[, filt]@exprs,
-                                             y = ..count.., fill = "single_bacteria"),
-                                alpha = 0.5) +
-          ggplot2::xlab(paste("log10(", filt, ")", sep = "")) +
-          ggplot2::xlim(1, 6)  + apatheme +
-          ggplot2::theme(axis.text.y = ggplot2::element_blank(), axis.ticks.y = ggplot2::element_blank()) +
-          ggplot2::theme(legend.position = "none")
-
-      }
+      ## NOTE: the local is necessary here as R is not good at variable scope.
+      ## Without the local, each plot gets overwritten by the final plot in the loop.
+      ## Also note the "<<-" to assign the plot outside of the local scope.
+      for (f.count in 1:length(flu_channels))
+        local({
+          f.count <- f.count
+          filt <- flu_channels[f.count]
+          plts[[f.count + 2]] <<- ggplot2::ggplot() +
+            ggplot2::geom_density(data = as.data.frame(flow_frame[, filt]@exprs),
+                                  ggplot2::aes(x = log10(flow_frame[, filt]@exprs),
+                                               y = ..count.., fill = "all_data"),
+                                  alpha = 0.5) +
+            ggplot2::geom_density(data = as.data.frame(bacteria_flow_frame[, filt]@exprs),
+                                  ggplot2::aes(x = bacteria_flow_frame[, filt]@exprs,
+                                               y = ..count.., fill = "bacteria"),
+                                  alpha = 0.5) +
+            ggplot2::geom_density(data = as.data.frame(singlet_flow_frame[, filt]@exprs),
+                                  ggplot2::aes(x = singlet_flow_frame[, filt]@exprs,
+                                               y = ..count.., fill = "single_bacteria"),
+                                  alpha = 0.5) +
+            ggplot2::xlab(paste("log10(", filt, ")", sep = "")) +
+            ggplot2::xlim(1, 6)  + apatheme +
+            ggplot2::theme(axis.text.y = ggplot2::element_blank(), axis.ticks.y = ggplot2::element_blank()) +
+            ggplot2::theme(legend.position = "none")
+        })
 
       plts[[3 + length(flu_channels)]] <- legend
 
