@@ -86,6 +86,7 @@ trim.fcs <- function(dir_path, pattern = "*.fcs", flu_channels=c("BL1-H"), do_pl
 
       ## SSC-H vs SSC-A
       plt_single <- ggplot2::ggplot() +
+        ggplot2::geom_abline(intercept = 0, slope = 1)+
         ggplot2::geom_point(data = dplyr::sample_n(as.data.frame(flow_frame[, c("SSC-H", "SSC-A")]@exprs), size = 2000),
                             ggplot2::aes(x = log10(`SSC-H`), y = log10(`SSC-A`), color = "all_data"),
                             alpha = 0.1) +
