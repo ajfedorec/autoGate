@@ -22,6 +22,8 @@ trim.fcs <- function(dir_path, pattern = "*.fcs", flu_channels=c("BL1-H"), do_pl
 
     ## Try to remove background debris by clustering
     bacteria_flow_frame <- get.bacteria(prepped_flow_frame)
+    try(if(bacteria_flow_frame == 0) {next}, silent = T) # if we haven't found bacteria move on to the next flow frame
+
 
     ## Try to remove doublets
     singlet_flow_frame <- get.singlets(bacteria_flow_frame)
@@ -64,13 +66,13 @@ trim.fcs <- function(dir_path, pattern = "*.fcs", flu_channels=c("BL1-H"), do_pl
       plts <- list()
       ## FSC-H vs SSC-H
       plt_main <- ggplot2::ggplot() +
-        ggplot2::geom_point(data = dplyr::sample_n(as.data.frame(flow_frame[, c("FSC-H", "SSC-H")]@exprs), size = 2000),
+        ggplot2::geom_point(data = dplyr::sample_n(as.data.frame(flow_frame[, c("FSC-H", "SSC-H")]@exprs), size = min(2000, flowCore::nrow(flow_frame))),
                             ggplot2::aes(x = log10(`FSC-H`), y = log10(`SSC-H`), color = "all_data"),
                             alpha = 0.1) +
-        ggplot2::geom_point(data = dplyr::sample_n(as.data.frame(bacteria_flow_frame[, c("FSC-H", "SSC-H")]@exprs), size = 2000),
+        ggplot2::geom_point(data = dplyr::sample_n(as.data.frame(bacteria_flow_frame[, c("FSC-H", "SSC-H")]@exprs), size = min(2000, flowCore::nrow(bacteria_flow_frame))),
                             ggplot2::aes(x = `FSC-H`, y = `SSC-H`, color = "bacteria"),
                             alpha = 0.1) +
-        ggplot2::geom_point(data = dplyr::sample_n(as.data.frame(singlet_flow_frame[, c("FSC-H", "SSC-H")]@exprs), size = 2000),
+        ggplot2::geom_point(data = dplyr::sample_n(as.data.frame(singlet_flow_frame[, c("FSC-H", "SSC-H")]@exprs), size = min(2000, flowCore::nrow(singlet_flow_frame))),
                             ggplot2::aes(x = `FSC-H`, y = `SSC-H`, color = "single_bacteria"),
                             alpha = 0.1) +
         ggplot2::xlab("log10(FSC-H)") +
@@ -87,13 +89,13 @@ trim.fcs <- function(dir_path, pattern = "*.fcs", flu_channels=c("BL1-H"), do_pl
       ## SSC-H vs SSC-A
       plt_single <- ggplot2::ggplot() +
         ggplot2::geom_abline(intercept = 0, slope = 1)+
-        ggplot2::geom_point(data = dplyr::sample_n(as.data.frame(flow_frame[, c("SSC-H", "SSC-A")]@exprs), size = 2000),
+        ggplot2::geom_point(data = dplyr::sample_n(as.data.frame(flow_frame[, c("SSC-H", "SSC-A")]@exprs), size = min(2000, flowCore::nrow(flow_frame))),
                             ggplot2::aes(x = log10(`SSC-H`), y = log10(`SSC-A`), color = "all_data"),
                             alpha = 0.1) +
-        ggplot2::geom_point(data = dplyr::sample_n(as.data.frame(bacteria_flow_frame[, c("SSC-H", "SSC-A")]@exprs), size = 2000),
+        ggplot2::geom_point(data = dplyr::sample_n(as.data.frame(bacteria_flow_frame[, c("SSC-H", "SSC-A")]@exprs), size = min(2000, flowCore::nrow(bacteria_flow_frame))),
                             ggplot2::aes(x = `SSC-H`, y = (`SSC-A`), color = "bacteria"),
                             alpha = 0.1) +
-        ggplot2::geom_point(data = dplyr::sample_n(as.data.frame(singlet_flow_frame[, c("SSC-H", "SSC-A")]@exprs), size = 2000),
+        ggplot2::geom_point(data = dplyr::sample_n(as.data.frame(singlet_flow_frame[, c("SSC-H", "SSC-A")]@exprs), size = min(2000, flowCore::nrow(singlet_flow_frame))),
                             ggplot2::aes(x = `SSC-H`, y = (`SSC-A`), color = "single_bacteria"),
                             alpha = 0.1) +
         ggplot2::xlab("log10(SSC-H)") +
