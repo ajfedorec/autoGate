@@ -6,10 +6,11 @@
 #' @param pattern a regex pattern to match particular .fcs files. Default is \code{"*.fcs"} matching all .fcs files.
 #' @param flu_channels a list of strings of the fluorescence channels to keep in the trimmed data and plotting. Defaults to "BL1-H".
 #' @param do_plot a Boolean flag to determine whether to produce plots showing the trimming of each flowFrame. Defaults to \code{FALSE}.
+#' @param pre_cleaned have you pre removed background debris
 #'
 #' @return nothing is returned. A new folder is created with the trimmed .fcs files and plots if the do_plot flag is TRUE.
 #' @export
-trim.fcs <- function(dir_path, pattern = "*.fcs", flu_channels=c("BL1-H"), do_plot = F){
+trim.fcs <- function(dir_path, pattern = "*.fcs", flu_channels=c("BL1-H"), do_plot = F, pre_cleaned = F){
   all_files <- list.files(path = dir_path, pattern = utils::glob2rx(pattern),
                           full.names = T, recursive = T, include.dirs = T)
   print(paste("Trimming ", length(all_files), " .fcs files.", sep = ""))
@@ -21,7 +22,7 @@ trim.fcs <- function(dir_path, pattern = "*.fcs", flu_channels=c("BL1-H"), do_pl
     prepped_flow_frame <- prep.flowFrame(flow_frame, flu_channels)
 
     ## Try to remove background debris by clustering
-    bacteria_flow_frame <- get.bacteria(prepped_flow_frame)
+    bacteria_flow_frame <- get.bacteria(prepped_flow_frame, pre_cleaned)
     try(if(bacteria_flow_frame == 0) {next}, silent = T) # if we haven't found bacteria move on to the next flow frame
 
 

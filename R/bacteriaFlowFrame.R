@@ -1,4 +1,8 @@
-get.bacteria <- function(flow_frame) {
+get.bacteria <- function(flow_frame, pre_cleaned) {
+  if(pre_cleaned){
+    return(flow_frame)
+  }
+
   ## calculate clusters for K=1 and K=2
   all_clusters <- flowClust::flowClust(flow_frame,
                              varNames = c("FSC-H", "SSC-H"),
