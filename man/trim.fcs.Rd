@@ -5,7 +5,7 @@
 \title{Trim .fcs files to remove debris and doublets.}
 \usage{
 trim.fcs(dir_path, pattern = "*.fcs", flu_channels = c("BL1-H"),
-  do_plot = F)
+  do_plot = F, pre_cleaned = F)
 }
 \arguments{
 \item{dir_path}{a directory path containing the .fcs files  to be parsed or folders to be recursed through.}
@@ -15,6 +15,8 @@ trim.fcs(dir_path, pattern = "*.fcs", flu_channels = c("BL1-H"),
 \item{flu_channels}{a list of strings of the fluorescence channels to keep in the trimmed data and plotting. Defaults to "BL1-H".}
 
 \item{do_plot}{a Boolean flag to determine whether to produce plots showing the trimming of each flowFrame. Defaults to \code{FALSE}.}
+
+\item{pre_cleaned}{have you pre removed background debris}
 }
 \value{
 nothing is returned. A new folder is created with the trimmed .fcs files and plots if the do_plot flag is TRUE.

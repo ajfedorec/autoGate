@@ -25,10 +25,8 @@ trim.fcs <- function(dir_path, pattern = "*.fcs", flu_channels=c("BL1-H"), do_pl
     bacteria_flow_frame <- get.bacteria(prepped_flow_frame, pre_cleaned)
     try(if(bacteria_flow_frame == 0) {next}, silent = T) # if we haven't found bacteria move on to the next flow frame
 
-
     ## Try to remove doublets
     singlet_flow_frame <- get.singlets(bacteria_flow_frame)
-
 
     ## Save trimmed flowFrames to a new folder
     out_name <- paste(dirname(next_fcs),
