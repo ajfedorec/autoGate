@@ -1,7 +1,8 @@
 prep.flowFrame <- function(flow_frame, flus) {
 
   # Remove channels that aren't being kept
-  min_flow_frame <- flow_frame[,c("FSC-H", "SSC-H", "SSC-A", flus)]
+  # min_flow_frame <- flow_frame[,c("FSC-H", "SSC-H", "SSC-A", flus)]
+  min_flow_frame <- flow_frame
 
   # log10 transform the values
   log10_flow_frame <-
