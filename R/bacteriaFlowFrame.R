@@ -1,6 +1,13 @@
 get.bacteria <- function(flow_frame, pre_cleaned) {
   if(pre_cleaned){
-    return(flow_frame)
+    best.clusters <- flowClust::flowClust(flow_frame,
+                                         varNames = c("FSC-H", "SSC-H"),
+                                         K = 1,
+                                         level = 0.90);
+
+    bact_flow_frame <- flow_frame[best.clusters,]
+
+    return(bact_flow_frame)
   } else {
 
     ## calculate clusters for K=1 and K=2
@@ -44,6 +51,7 @@ get.bacteria <- function(flow_frame, pre_cleaned) {
         bact_flow_frame <- flow_frame[best.clusters,]
       }
     }
+
     return(bact_flow_frame)
   }
 }
