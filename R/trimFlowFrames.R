@@ -5,12 +5,31 @@
 #' @param dir_path a directory path containing the .fcs files  to be parsed or folders to be recursed through.
 #' @param pattern a regex pattern to match particular .fcs files. Default is \code{"*.fcs"} matching all .fcs files.
 #' @param flu_channels a list of strings of the fluorescence channels to keep in the trimmed data and plotting. Defaults to "BL1-H".
+#' @param calibrate a Boolean flag to determine whether to convert fluorescence to MEF values. Requires an .fcs file with named \code{"*beads*.fcs"}. Defaults to \code{FALSE}.
 #' @param do_plot a Boolean flag to determine whether to produce plots showing the trimming of each flowFrame. Defaults to \code{FALSE}.
 #' @param pre_cleaned have you pre removed background debris
+#' @param cal_bead_peaks a list of lists in the form \code{list(list(channel="BL1-H", peaks=c(0, 200, ...)} of MEF fluorescence values for the calibration beads. Default values for BL1-H and YL2-H.
 #'
 #' @return nothing is returned. A new folder is created with the trimmed .fcs files and plots if the do_plot flag is TRUE.
 #' @export
-trim.fcs <- function(dir_path, pattern = "*.fcs", flu_channels=c("BL1-H"), do_plot = F, pre_cleaned = F){
+trim.fcs <- function(dir_path, pattern = "*.fcs", flu_channels=c("BL1-H"),
+                     do_plot = F, pre_cleaned = F,
+                     calibrate = F, cal_bead_peaks = NA){
+  ## Create directory for trimmed flowFrames
+  if (!dir.exists(paste(dir_path, "trimmed", sep="_"))) {
+    dir.create(paste(dir_path, "trimmed", sep="_"), recursive = T)
+  }
+
+  if(calibrate){
+    ## First step is to get calibration standard curves
+    bead_file <- unlist(list.files(path = dir_path, pattern = utils::glob2rx("*beads*.fcs"),
+               full.names = T, recursive = T, include.dirs = T))
+
+    bead_frame <- flowCore::read.FCS(bead_file, emptyValue = F)
+
+    calibration_parameters <- get.calibration(dir_path, bead_frame, flu_channels, cal_bead_peaks)
+  }
+
   all_files <- list.files(path = dir_path, pattern = utils::glob2rx(pattern),
                           full.names = T, recursive = T, include.dirs = T)
   print(paste("Trimming ", length(all_files), " .fcs files.", sep = ""))
@@ -28,15 +47,19 @@ trim.fcs <- function(dir_path, pattern = "*.fcs", flu_channels=c("BL1-H"), do_pl
     ## Try to remove doublets
     singlet_flow_frame <- get.singlets(bacteria_flow_frame)
 
+    ## Convert to MEF
+    if(calibrate){
+      out_flow_frame <- to.MEF(singlet_flow_frame, flu_channels, calibration_parameters)
+    } else {
+      out_flow_frame <- singlet_flow_frame
+    }
+
     ## Save trimmed flowFrames to a new folder
     out_name <- paste(dirname(next_fcs),
                       "_trimmed/",
                       basename(next_fcs),
                       sep = "")
-    if (!dir.exists(dirname(out_name))) {
-      dir.create(dirname(out_name), recursive = T)
-    }
-    flowCore::write.FCS(singlet_flow_frame, out_name)
+    flowCore::write.FCS(out_flow_frame, out_name)
 
     ##  Plot a grid of graphs showing the stages of trimming
     if (do_plot) {
@@ -126,9 +149,17 @@ trim.fcs <- function(dir_path, pattern = "*.fcs", flu_channels=c("BL1-H"), do_pl
                                                y = ..count.., fill = "single_bacteria"),
                                   alpha = 0.5) +
             ggplot2::xlab(paste("log10(", filt, ")", sep = "")) +
-            ggplot2::xlim(1, 6)  + apatheme +
+            ggplot2::xlim(0, 6)  + apatheme +
             ggplot2::theme(axis.text.y = ggplot2::element_blank(), axis.ticks.y = ggplot2::element_blank()) +
             ggplot2::theme(legend.position = "none")
+
+          if(calibrate){
+            plts[[f.count + 2]] <<- plts[[f.count + 2]] +
+              ggplot2::geom_density(data = as.data.frame(out_flow_frame[, filt]@exprs),
+                                    ggplot2::aes(x = out_flow_frame[, filt]@exprs,
+                                                 y = ..count..),
+                                    alpha = 0.5, fill = "grey")
+          }
         })
 
       plts[[3 + length(flu_channels)]] <- legend

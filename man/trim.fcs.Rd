@@ -4,8 +4,15 @@
 \alias{trim.fcs}
 \title{Trim .fcs files to remove debris and doublets.}
 \usage{
-trim.fcs(dir_path, pattern = "*.fcs", flu_channels = c("BL1-H"),
-  do_plot = F, pre_cleaned = F)
+trim.fcs(
+  dir_path,
+  pattern = "*.fcs",
+  flu_channels = c("BL1-H"),
+  calibrate = F,
+  do_plot = F,
+  pre_cleaned = F,
+  cal_bead_peaks = NA
+)
 }
 \arguments{
 \item{dir_path}{a directory path containing the .fcs files  to be parsed or folders to be recursed through.}
@@ -14,9 +21,13 @@ trim.fcs(dir_path, pattern = "*.fcs", flu_channels = c("BL1-H"),
 
 \item{flu_channels}{a list of strings of the fluorescence channels to keep in the trimmed data and plotting. Defaults to "BL1-H".}
 
+\item{calibrate}{a Boolean flag to determine whether to convert fluorescence to MEF values. Requires an .fcs file with named \code{"*beads*.fcs"}. Defaults to \code{FALSE}.}
+
 \item{do_plot}{a Boolean flag to determine whether to produce plots showing the trimming of each flowFrame. Defaults to \code{FALSE}.}
 
 \item{pre_cleaned}{have you pre removed background debris}
+
+\item{cal_bead_peaks}{a list of lists in the form \code{list(list(channel="BL1-H", peaks=c(0, 200, ...)} of MEF fluorescence values for the calibration beads. Default values for BL1-H and YL2-H.}
 }
 \value{
 nothing is returned. A new folder is created with the trimmed .fcs files and plots if the do_plot flag is TRUE.
