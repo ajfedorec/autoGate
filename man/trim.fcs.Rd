@@ -12,6 +12,7 @@ trim.fcs(
   pre_cleaned = F,
   calibrate = F,
   MEF_peaks = NA,
+  bead_dens_bw = 0.025,
   manual_peaks = NA
 )
 }
@@ -29,6 +30,8 @@ trim.fcs(
 \item{calibrate}{a Boolean flag to determine whether to convert fluorescence to MEF values. Requires an .fcs file with named \code{"*beads*.fcs"}. Defaults to \code{FALSE}.}
 
 \item{MEF_peaks}{a list of lists in the form \code{list(list(channel="BL1-H", peaks=c(0, 200, ...)} of MEF fluorescence values for the calibration beads. Default values for BL1-H and YL2-H.}
+
+\item{bead_dens_bw}{the bandwidth for the kernel density of the bead peak data. Default = 0.025. Increase if erroneous peaks are being found, decrease if not enough peaks are found.}
 
 \item{manual_peaks}{if bead peaks are not being found by the EM algorithm, one can manually specify the positions of the bead peaks (on a log10 scale). A list of lists in the form \code{list(list(channel="BL1-H", peaks=c(2.1, 2.8, ...)} of log10 fluorescence values for the calibration beads.}
 }

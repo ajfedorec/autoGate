@@ -1,6 +1,6 @@
 Package: autoGate
 Type: Package
-Version: 3.1.0
+Version: 3.1.1
 Title: Tool for Removing Background Debris and Doublets From .fcs Files
 Description: Uses mixture models to cluster bacteria from background debris and fits a linear model to SSC-H vs SSC-A to remove doublets.
 Authors@R: person("Fedorec", "Alex J H", , "alexander.fedorec.13@ucl.ac.uk", c("aut", "cre"))
@@ -25,4 +25,4 @@ LinkingTo:
 Suggests:
 License: GPL-2
 LazyData: true
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.0

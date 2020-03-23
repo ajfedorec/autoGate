@@ -9,13 +9,14 @@
 #' @param do_plot a Boolean flag to determine whether to produce plots showing the trimming of each flowFrame. Defaults to \code{FALSE}.
 #' @param pre_cleaned have you pre removed background debris
 #' @param MEF_peaks a list of lists in the form \code{list(list(channel="BL1-H", peaks=c(0, 200, ...)} of MEF fluorescence values for the calibration beads. Default values for BL1-H and YL2-H.
+#' @param bead_dens_bw the bandwidth for the kernel density of the bead peak data. Default = 0.025. Increase if erroneous peaks are being found, decrease if not enough peaks are found.
 #' @param manual_peaks if bead peaks are not being found by the EM algorithm, one can manually specify the positions of the bead peaks (on a log10 scale). A list of lists in the form \code{list(list(channel="BL1-H", peaks=c(2.1, 2.8, ...)} of log10 fluorescence values for the calibration beads.
 #'
 #' @return nothing is returned. A new folder is created with the trimmed .fcs files and plots if the do_plot flag is TRUE.
 #' @export
 trim.fcs <- function(dir_path, pattern = "*.fcs", flu_channels=c("BL1-H"),
                      do_plot = F, pre_cleaned = F,
-                     calibrate = F, MEF_peaks = NA, manual_peaks = NA){
+                     calibrate = F, MEF_peaks = NA, bead_dens_bw = 0.025, manual_peaks = NA){
   ## Create directory for trimmed flowFrames
   if (!dir.exists(paste(dir_path, "trimmed", sep="_"))) {
     dir.create(paste(dir_path, "trimmed", sep="_"), recursive = T)
@@ -28,7 +29,7 @@ trim.fcs <- function(dir_path, pattern = "*.fcs", flu_channels=c("BL1-H"),
 
     bead_frame <- flowCore::read.FCS(bead_file, emptyValue = F)
 
-    calibration_parameters <- get.calibration(dir_path, bead_frame, flu_channels, MEF_peaks, manual_peaks)
+    calibration_parameters <- get.calibration(bead_file, bead_frame, flu_channels, MEF_peaks, manual_peaks, bead_dens_bw)
   }
 
   all_files <- list.files(path = dir_path, pattern = utils::glob2rx(pattern),

@@ -1,8 +1,16 @@
-get.calibration <- function(dir_path, bead_frame, flu_channels, MEF_peaks, manual_peaks){
+get.calibration <- function(bead_file, bead_frame, flu_channels, MEF_peaks, manual_peaks, bead_dens_bw){
+  out_name <- paste(dirname(bead_file),
+                    "_trimmed/",
+                    basename(unlist(strsplit(bead_file, split = "[.]"))[1]),
+                    sep = "")
+
+  ## default peak postions if none provided
   if(is.na(MEF_peaks)){
     MEF_peaks <- list(list(channel="BL1-H", peaks=c(0, 822, 2114, 5911, 17013, 41837, 145365, 287558)),
                       list(channel="YL2-H", peaks=c(0, 218, 581, 1963, 6236, 15267, 68766, 181945)))
   }
+
+  ## make a vector of channels for which to produce calibration parameters
   peak_channels <- c()
   for(i in 1:length(MEF_peaks)){
     if(MEF_peaks[[i]]$channel %in% flu_channels){
@@ -33,38 +41,35 @@ get.calibration <- function(dir_path, bead_frame, flu_channels, MEF_peaks, manua
     ggplot2::scale_x_continuous(name = "log10 FSC-H")+
     ggplot2::scale_y_continuous(name = "log10 SSC-H")+
     ggplot2::theme_bw(base_size = 8)
-  ggplot2::ggsave(plot = singlet_plot, filename = paste(dir_path,
-                                                        "_trimmed/singlet_beads.pdf",
+  ggplot2::ggsave(plot = singlet_plot, filename = paste(out_name,
+                                                        "_singlet_beads.pdf",
                                                         sep = ""), width = 60, height = 60, units = "mm")
-
 
   calibration_parameters <- c()
   for (i in 1:length(peak_channels)){
-
     hist_plt <- ggplot2::ggplot()+
-      ggplot2::geom_histogram(data=as.data.frame(log10_bead_frame@exprs),
-                              ggplot2::aes(log10_bead_frame[,peak_channels[i]]@exprs, y=..count..),
-                              bins=200, alpha=0.25)+
-      ggplot2::geom_histogram(data=as.data.frame(singlet_beads@exprs),
-                              ggplot2::aes(singlet_beads[,peak_channels[i]]@exprs, y=..count..),
-                              bins=200, alpha=0.75)+
+      ggplot2::geom_density(data=as.data.frame(log10_bead_frame@exprs),
+                            ggplot2::aes(log10_bead_frame[,peak_channels[i]]@exprs),
+                            fill="black", alpha=0.25, bw = bead_dens_bw)+
+      ggplot2::geom_density(data=as.data.frame(singlet_beads@exprs),
+                            ggplot2::aes(singlet_beads[,peak_channels[i]]@exprs),
+                            fill="green", alpha=0.75, bw = bead_dens_bw)+
       ggplot2::scale_x_continuous(paste("log10", peak_channels[i], "(a.u.)"))+
       ggplot2::theme_bw(base_size = 8)
 
+    ##### FIND PEAKS #####
     if(is.na(manual_peaks)){
-      ## cluster on fluorescence channels to find beads
-      fluorescence_cluster <- flowClust::flowClust(stats::na.omit(singlet_beads),
-                                                   varNames = peak_channels[i],
-                                                   randomStart = 10,
-                                                   K = 8)
+      ## find peaks based on density estimate
+      dens_d <- stats::density(singlet_beads@exprs[,peak_channels[i]], bw = bead_dens_bw)
+      peak_table <- data.frame(dens_d[c("x", "y")])[c(F, diff(diff(dens_d$y)>=0)<0),] ## get peaks and heights
+      peaks <- dplyr::top_n(peak_table, n = length(MEF_peaks[[i]]$peaks), wt = y)$x ## select only
 
       hist_plt <- hist_plt +
-        ggplot2::geom_vline(xintercept = flowClust::getEstimates(fluorescence_cluster, singlet_beads)$locationsC[,i],
+        ggplot2::geom_vline(xintercept = peaks,
                             linetype=2, size=0.2)
 
-      ## get measured peaks and peak mefs (remove first bead due to log10(0))
-      peaks <- sort(flowClust::getEstimates(fluorescence_cluster, singlet_beads)$locationsC)[-1]
-    } else { ## if peaks are being manually identified
+      peaks <- peaks[-1]
+    } else { ## OR peaks are being manually identified
       peaks <- NA
       for(j in 1:length(manual_peaks)){
         if(manual_peaks[[j]]$channel == peak_channels[i]){
@@ -108,8 +113,8 @@ get.calibration <- function(dir_path, bead_frame, flu_channels, MEF_peaks, manua
       ggplot2::theme_bw(base_size = 8)
 
     plt <- gridExtra::arrangeGrob(grobs = list(hist_plt, cal_plt), ncol = 2)
-    ggplot2::ggsave(plot = plt, filename = paste(dir_path,
-                                                 "_trimmed/", peak_channels[i], "_calibration.pdf",
+    ggplot2::ggsave(plot = plt, filename = paste(out_name,
+                                                 "_", peak_channels[i], "_calibration.pdf",
                                                  sep = ""), width = 130, height = 60, units = "mm")
   }
 
