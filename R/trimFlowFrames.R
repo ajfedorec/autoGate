@@ -26,10 +26,11 @@ trim.fcs <- function(dir_path, pattern = "*.fcs", flu_channels=c("BL1-H"),
     ## First step is to get calibration standard curves
     bead_file <- unlist(list.files(path = dir_path, pattern = utils::glob2rx("*beads*.fcs"),
                full.names = T, recursive = T, include.dirs = T))
+    if(length(bead_file) < 4){
+      stop("No beads file found.")
+    }
 
-    bead_frame <- flowCore::read.FCS(bead_file, emptyValue = F)
-
-    calibration_parameters <- get.calibration(bead_file, bead_frame, flu_channels, MEF_peaks, manual_peaks, bead_dens_bw)
+    calibration_parameters <- get.calibration(bead_file, flu_channels, MEF_peaks, manual_peaks, bead_dens_bw)
   }
 
   all_files <- list.files(path = dir_path, pattern = utils::glob2rx(pattern),

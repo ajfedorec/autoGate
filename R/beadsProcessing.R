@@ -1,4 +1,6 @@
-get.calibration <- function(bead_file, bead_frame, flu_channels, MEF_peaks, manual_peaks, bead_dens_bw){
+get.calibration <- function(bead_file, flu_channels, MEF_peaks, manual_peaks, bead_dens_bw){
+  bead_frame <- flowCore::read.FCS(bead_file, emptyValue = F)
+
   out_name <- paste(dirname(bead_file),
                     "_trimmed/",
                     basename(unlist(strsplit(bead_file, split = "[.]"))[1]),
